@@ -7,7 +7,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Pest\Laravel\assertDatabaseCount;
 
-todo('should be able to create a tweet', function () {
+it('should be able to create a tweet', function () {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -24,7 +24,21 @@ todo('should be able to create a tweet', function () {
         ->created_by->toBe($user->id);
 });
 
-todo('should make sure that only authenticated users can tweet');
+it('should make sure that only authenticated users can tweet', function () {
+
+    livewire(Create::class)
+        ->set('body', 'This is my first tweet')
+        ->call('tweet')
+        ->assertForbidden();
+
+    actingAs(User::factory()->create());
+
+    livewire(Create::class)
+        ->set('body', 'This is my first tweet')
+        ->call('tweet')
+        ->assertEmitted('tweet::created');
+});
+
 todo('body is required');
 todo('the tweet should have a max length of 140 characters');
 todo('should show the tweet on the timeline');
